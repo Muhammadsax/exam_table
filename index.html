@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>جدول الامتحانات النهائية - كلية تقنية المعلومات</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
   <!-- شعار الكلية -->
@@ -18,11 +18,11 @@
 
   <div class="controls">
     <a href="https://mohammedsa-protofolio.netlify.app/" class="back-link">العودة إلى معرض الأعمال</a>
-    <button id="download-pdf" class="download-button">تحميل كـ PDF</button>
+    <button id="download-pdf-button" class="download-button">تحميل كـ PDF</button>
   </div>
 
   <!-- عرض جدول الامتحانات -->
-  <div id="element-to-capture" class="main-container">
+  <div id="content-to-export" class="main-container">
     <h1>جدول الامتحانات النصفية للقسم العام</h1>
     <table>
       <thead>
@@ -182,67 +182,10 @@
     </div>
   </div>
 
-  <!-- تضمين مكتبات html2canvas و jsPDF من CDN -->
-  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script>
-    function generatePDF() {
-      html2canvas(document.getElementById("element-to-capture"), { scale: 2 }).then(canvas => {
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF("p", "pt", "a4");
-
-        // أبعاد صفحة PDF
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
-
-        // حساب ارتفاع الصورة (imgHeight) في PDF بناءً على نسبة canvas
-        const imgHeight = (canvas.height * pdfWidth) / canvas.width;
-
-        // حساب إجمالي عدد الصفوف لتحديد تقسيم الأيام (أول 8 أيام في الصفحة الأولى)
-        const rows = document.querySelectorAll("#element-to-capture table tbody tr");
-        const totalRows = rows.length;
-
-        // تحديد ارتفاع الـ canvas الخاص بالصفحة الأولى ليشمل أول 8 أيام
-        const firstPageCanvasHeight = totalRows > 8 ? (canvas.height * 8 / totalRows) : canvas.height;
-        const firstPageImgHeight = (firstPageCanvasHeight * pdfWidth) / canvas.width;
-
-        // إنشاء canvas مؤقت للصفحة الأولى
-        let canvasPage1 = document.createElement("canvas");
-        canvasPage1.width = canvas.width;
-        canvasPage1.height = firstPageCanvasHeight;
-        let ctx1 = canvasPage1.getContext("2d");
-        ctx1.drawImage(canvas, 0, 0, canvas.width, firstPageCanvasHeight,
-                         0, 0, canvas.width, firstPageCanvasHeight);
-        const imgDataPage1 = canvasPage1.toDataURL("image/png");
-
-        // إضافة الصفحة الأولى إلى PDF
-        pdf.addImage(imgDataPage1, 'PNG', 0, 0, pdfWidth, firstPageImgHeight);
-
-        // إذا كان هناك محتوى إضافي (أيام بعد الأيام الثمانية الأولى)
-        if (totalRows > 8) {
-          const remainingCanvasHeight = canvas.height - firstPageCanvasHeight;
-          const secondPageImgHeight = (remainingCanvasHeight * pdfWidth) / canvas.width;
-          
-          // إنشاء canvas مؤقت للصفحة الثانية
-          let canvasPage2 = document.createElement("canvas");
-          canvasPage2.width = canvas.width;
-          canvasPage2.height = remainingCanvasHeight;
-          let ctx2 = canvasPage2.getContext("2d");
-          // قم بقص الجزء المتبقي من الـ canvas الأصلي
-          ctx2.drawImage(canvas, 0, firstPageCanvasHeight, canvas.width, remainingCanvasHeight,
-                           0, 0, canvas.width, remainingCanvasHeight);
-          const imgDataPage2 = canvasPage2.toDataURL("image/png");
-
-          // إضافة الصفحة الثانية
-          pdf.addPage();
-          pdf.addImage(imgDataPage2, 'PNG', 0, 0, pdfWidth, secondPageImgHeight);
-        }
-
-        pdf.save("output.pdf");
-      });
-    }
-    // استدعاء الوظيفة عند النقر على الزر بدلاً من التحميل التلقائي
-    document.getElementById('download-pdf').addEventListener('click', generatePDF);
-  </script>
+  <!-- تضمين مكتبة html2pdf.js لتصدير PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  
+  <!-- ربط ملف JavaScript الخارجي -->
+  <script src="assets/app.js"></script>
 </body>
 </html>
